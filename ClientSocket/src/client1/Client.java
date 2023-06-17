@@ -14,6 +14,7 @@ public class Client {
     public  Client(Socket socket,String username){
         try{
             this.socket=socket;
+            this.username=username;
             this.bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {
@@ -35,7 +36,7 @@ public class Client {
 
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
 
@@ -49,7 +50,7 @@ public class Client {
                     try {
                         msgFromGroupChat=bufferedReader.readLine();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        closeEverything(socket,bufferedReader,bufferedWriter);
                     }
                 }
             }
