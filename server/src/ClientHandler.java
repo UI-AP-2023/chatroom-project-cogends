@@ -16,15 +16,54 @@ public class ClientHandler implements Runnable{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
             clientHandlers.add(this);
-            System.out.println("SERVER:" + clientUsername+"has connected the chat");
+            broadcastMassage("SERVER:" + clientUsername+"has connected the chat");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            closeEveryThing(socket,bufferedWriter,bufferedReader);
         }
 
     }
 
     @Override
     public void run() {
-
+        String massageFromClient;
+        while (socket.isConnected()){
+            try {
+                massageFromClient=bufferedReader.readLine();
+                broadcastMassage(massageFromClient);
+            } catch (IOException e) {
+                closeEveryThing(socket,bufferedWriter,bufferedReader);
+                break;
+            }
+        }
+    }
+    public void broadcastMassage(String massageToSend){
+        try{
+            for (ClientHandler clientHandler:clientHandlers){
+                if (!clientHandler.clientUsername.equals(this.clientUsername)){
+                    clientHandler.bufferedWriter.write(massageToSend);
+                    clientHandler.bufferedWriter.newLine();
+                    clientHandler.bufferedWriter.flush();
+                }
+            }
+        }catch (IOException e) {
+            closeEveryThing(socket,bufferedWriter,bufferedReader); throw new RuntimeException(e);
+        }
+    }
+    public void removeClientHandler(){
+        clientHandlers.remove(this);
+        broadcastMassage("SERVER:" + clientUsername+"has left the chat");
+    }
+    public void closeEveryThing(Socket socket,BufferedWriter bufferedWriter,BufferedReader bufferedReader){
+        removeClientHandler();
+        try {
+            if (bufferedReader!= null)
+                bufferedReader.close();
+            if (bufferedWriter!= null)
+                bufferedWriter.close();
+            if (socket!= null)
+                socket.close();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
