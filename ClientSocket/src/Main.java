@@ -7,7 +7,22 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+<<<<<<< HEAD
 
+=======
+        Socket clientSocket=new Socket("127.0.0.1",1234);
+        System.out.println("connected");
+        Scanner sc=new Scanner(System.in);
+        PrintWriter out=new PrintWriter(clientSocket.getOutputStream(),true);
+        String input="";
+        do{
+            input=sc.nextLine();
+            out.println(input);
+        }
+        while (!Objects.equals(input, "finish"));
+        System.out.println("proses finish ");
+        out.close();
+>>>>>>> d7e37eca5c358695b2db7101fcbe8d222661ffb6
 
     }
 }

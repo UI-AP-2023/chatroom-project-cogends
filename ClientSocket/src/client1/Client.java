@@ -13,6 +13,7 @@ public class Client {
     //-----------------------------------
     public  Client(Socket socket,String username){
         try{
+            this.username=username;
             this.socket=socket;
             this.username=username;
             this.bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
