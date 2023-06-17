@@ -2,6 +2,7 @@ package client1;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
     private Socket socket;
@@ -18,6 +19,20 @@ public class Client {
         }
     }
     public void sendMessage(){
+        try {
+            bufferedWriter.write(username);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+            Scanner scanner=new Scanner(System.in);
+            while (socket.isConnected()){
+                String messageToSend=scanner.nextLine();
+                bufferedWriter.write(username+": "+messageToSend);
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
 
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
