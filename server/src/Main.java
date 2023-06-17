@@ -7,10 +7,8 @@ import java.net.Socket;
 public class Main {
     public static void main(String[] args) throws IOException {
 //        System.out.println("waiting ");
-        ServerSocket serverSocket=new ServerSocket(6666);
-        while (true){
-            Socket clientSocket=serverSocket.accept();
-            System.out.println("server accepted");
-        }
+        ServerSocket serverSocket=new ServerSocket(1234);
+        Server server = new Server(serverSocket);
+        server.startServer();
     }
 }
