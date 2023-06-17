@@ -19,8 +19,7 @@ public class Client {
             this.bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+closeEverything(socket,bufferedReader,bufferedWriter);        }
     }
     //----------------------------------
     public void sendMessage(){
@@ -50,6 +49,7 @@ public class Client {
                 while (socket.isConnected()){
                     try {
                         msgFromGroupChat=bufferedReader.readLine();
+                        System.out.println(msgFromGroupChat);
                     } catch (IOException e) {
                         closeEverything(socket,bufferedReader,bufferedWriter);
                     }

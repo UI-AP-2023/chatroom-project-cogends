@@ -10,6 +10,7 @@ public class Server {
     }
     public void startServer(){
         try {
+          //  System.out.println("befor while");
             while (!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
                 System.out.println("a new client has connected ");
@@ -18,8 +19,7 @@ public class Server {
                 thread.start();
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        closeServerSocket();        }
     }
     public void closeServerSocket(){
         if (serverSocket != null) {
