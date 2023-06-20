@@ -11,10 +11,8 @@ public class Server {
     }
     public void startServer(){
         try {
-          //  System.out.println("befor while");
             while (!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
-                System.out.println("a new client has connected ");
                 ClientHandler clientHandler = new ClientHandler(socket);
                 Thread thread = new Thread(clientHandler);
                 thread.start();

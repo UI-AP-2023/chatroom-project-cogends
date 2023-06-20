@@ -1,9 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
@@ -20,6 +17,7 @@ public class ClientHandler implements Runnable {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
+            this.clientID=clientHandlers.size()+String.valueOf(Integer.valueOf(this.clientUsername.charAt(1)));
             clientHandlers.add(this);
             broadcastMassage("SERVER: " + clientUsername + " has connected the chat ");
         } catch (IOException e) {
@@ -36,6 +34,10 @@ public class ClientHandler implements Runnable {
                 if (massageFromClient.equals("exit")) {
                     closeEveryThing(socket,bufferedWriter,bufferedReader);
                 }else {
+                    if (!massageFromClient.equals("")) {
+                        Massages massages = new Massages();
+                        massages.saveMassage(this.clientID,this.clientUsername,massageFromClient, LocalDateTime.now());
+                    }
                     broadcastMassage(massageFromClient);
                 }
             } catch (IOException e) {
@@ -54,6 +56,15 @@ public class ClientHandler implements Runnable {
                         clientHandler.bufferedWriter.write(massageToSend);
                         clientHandler.bufferedWriter.newLine();
                         clientHandler.bufferedWriter.flush();
+                    }
+                    else {
+                        Massages massages = new Massages();
+
+                        for (String massage0 :massages.showMassage()){
+                            clientHandler.bufferedWriter.write(massage0);
+                            clientHandler.bufferedWriter.newLine();
+                            clientHandler.bufferedWriter.flush();
+                        }
                     }
                 }
             } catch (IOException e) {
