@@ -19,7 +19,7 @@ public class Massages {
     public ArrayList<String> showMassage(){
 
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/chatroom-db","server","1234");
             String SQLCom  ="SELECT `username`, `massage` FROM `massages`";
             Statement s = connection.prepareStatement(SQLCom);

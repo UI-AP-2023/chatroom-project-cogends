@@ -13,12 +13,17 @@ public class ClientHandler implements Runnable {
 
     public ClientHandler(Socket socket) throws IOException {
         try {
+            Users.getInstance().saveUsers();
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
             this.clientID=clientHandlers.size()+String.valueOf(Integer.valueOf(this.clientUsername.charAt(1)));
-            clientHandlers.add(this);
+            if(Users.getInstance().showUsers().contains(clientID)){
+            clientHandlers.add(this);}
+            else {
+                sendTryAgain(clientUsername);
+            }
             broadcastMassage("SERVER: " + clientUsername + " has connected the chat ");
         } catch (IOException e) {
             closeEveryThing(socket, bufferedWriter, bufferedReader);
@@ -45,7 +50,6 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
     public void broadcastMassage(String massageToSend) throws IOException {
         if (massageToSend.equals("")){
             sendConnected(this.clientUsername);
@@ -103,4 +107,15 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+    //--------------------------------------------
+    public void sendTryAgain(String username) throws IOException {
+        for (ClientHandler clientHandler : clientHandlers) {
+            if (clientHandler.clientUsername.equals(username)) {
+                clientHandler.bufferedWriter.write(" try again ");
+                clientHandler.bufferedWriter.newLine();
+                clientHandler.bufferedWriter.flush();
+            }
+        }
+    }
+    //--------------------------------------------------
 }
