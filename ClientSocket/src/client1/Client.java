@@ -2,6 +2,7 @@ package client1;
 
 import java.io.*;
 import java.net.Socket;
+
 import java.util.Scanner;
 
 public class Client {
@@ -9,11 +10,11 @@ public class Client {
     private BufferedReader bufferedReader;
     private String username;
     private BufferedWriter bufferedWriter;
+    private long start;
 
     //-----------------------------------
     public Client(Socket socket, String username) {
         try {
-            this.username = username;
             this.socket = socket;
             this.username = username;
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -29,15 +30,26 @@ public class Client {
             bufferedWriter.write(username);
             bufferedWriter.newLine();
             bufferedWriter.flush();
+            start = System.currentTimeMillis();
+            bufferedWriter.write("");//----------------------
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
             Scanner scanner = new Scanner(System.in);
             while (socket.isConnected()) {
                 String messageToSend = scanner.nextLine();
-                if (messageToSend.contains("ping")) {
-                    bufferedWriter.write(username + " :" );//----------------------
+                if (messageToSend.equals("exit")) {
+                    bufferedWriter.write("exit");//----------------------
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+                    closeEverything(socket,bufferedReader,bufferedWriter);
+                }
+                if (messageToSend.equals("ping")) {
+                    start = System.currentTimeMillis();
+                    bufferedWriter.write("");//----------------------
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
                 } else {
-                    bufferedWriter.write(username + ": " + messageToSend);
+                    bufferedWriter.write(username + " : " + messageToSend);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
                 }
@@ -52,12 +64,18 @@ public class Client {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String msgFromGroupChat;
+                String msgFromGroupChat="";
                 while (socket.isConnected()) {
                     try {
                         msgFromGroupChat = bufferedReader.readLine();
-                        System.out.println(msgFromGroupChat);
-                    } catch (IOException e) {
+                        if (msgFromGroupChat.equals("connected")){
+                            long end=System.currentTimeMillis();
+                            System.out.println("ping : "+ (end-start));
+                        }else {
+                            System.out.println(msgFromGroupChat);
+                        }
+
+                    } catch (IOException|NullPointerException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
                 }
@@ -70,6 +88,7 @@ public class Client {
         try {
             if (bufferedReader != null) {
                 bufferedReader.close();
+
             }
             if (bufferedWriter != null) {
                 bufferedWriter.close();
@@ -91,14 +110,7 @@ public class Client {
         Client client = new Client(socket, username);
         client.listenForMassage();
         client.sendMessage();
+
     }
-    //-------------------------
-//     if(massageFromClient.contains("ping")){
-//                        String[] strings = massageFromClient.split("\\s+");
-//                        String username=strings[3];
-//                        for (ClientHandler clientHandler:clientHandlers){
-//                            if (!clientHandler.clientUsername.equals(this.clientUsername)){
-//
-//                            }}
 
 }

@@ -1,5 +1,9 @@
 import java.io.*;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
@@ -10,7 +14,7 @@ public class ClientHandler implements Runnable {
     private String clientUsername;
     private String clientID;
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket) throws IOException {
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -29,41 +33,42 @@ public class ClientHandler implements Runnable {
         while (socket.isConnected()) {
             try {
                 massageFromClient = bufferedReader.readLine();
-                broadcastMassage(massageFromClient);
+                if (massageFromClient.equals("exit")) {
+                    closeEveryThing(socket,bufferedWriter,bufferedReader);
+                }else {
+                    broadcastMassage(massageFromClient);
+                }
             } catch (IOException e) {
-                closeEveryThing(socket, bufferedWriter, bufferedReader);
                 break;
             }
         }
     }
 
-    public void broadcastMassage(String massageToSend) {
-        try {
-            for (ClientHandler clientHandler : clientHandlers) {
-                if (!clientHandler.clientUsername.equals(this.clientUsername)) {
-                    String[] strings = massageToSend.split("\\s+");
-                    String username=strings[0];
-                    if (strings.length == 2) {
-                        sendConnected(username);
-                    } else {
+    public void broadcastMassage(String massageToSend) throws IOException {
+        if (massageToSend.equals("")){
+            sendConnected(this.clientUsername);
+        }else {
+            try {
+                for (ClientHandler clientHandler : clientHandlers) {
+                    if (!clientHandler.clientUsername.equals(this.clientUsername)) {
                         clientHandler.bufferedWriter.write(massageToSend);
                         clientHandler.bufferedWriter.newLine();
                         clientHandler.bufferedWriter.flush();
                     }
                 }
+            } catch (IOException e) {
+                closeEveryThing(socket, bufferedWriter, bufferedReader);
             }
-        } catch (IOException e) {
-            closeEveryThing(socket, bufferedWriter, bufferedReader);
-            throw new RuntimeException(e);
         }
+
     }
 
-    public void removeClientHandler() {
+    public void removeClientHandler() throws IOException {
         clientHandlers.remove(this);
-        broadcastMassage("SERVER:" + clientUsername + "has left the chat");
+        broadcastMassage("SERVER:" + clientUsername + " has left the chat");
     }
 
-    public void closeEveryThing(Socket socket, BufferedWriter bufferedWriter, BufferedReader bufferedReader) {
+    public void closeEveryThing(Socket socket, BufferedWriter bufferedWriter, BufferedReader bufferedReader) throws IOException {
         removeClientHandler();
         try {
             if (bufferedReader != null)
@@ -80,7 +85,7 @@ public class ClientHandler implements Runnable {
     //----------------------------------------------
     public void sendConnected(String username) throws IOException {
         for (ClientHandler clientHandler : clientHandlers) {
-            if (!clientHandler.clientUsername.equals(username)) {
+            if (clientHandler.clientUsername.equals(username)) {
                 clientHandler.bufferedWriter.write("connected");
                 clientHandler.bufferedWriter.newLine();
                 clientHandler.bufferedWriter.flush();
