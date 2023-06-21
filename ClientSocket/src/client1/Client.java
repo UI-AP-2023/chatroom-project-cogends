@@ -8,17 +8,18 @@ import java.util.Scanner;
 public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
-    private String username;
+
+    private String userID;
     private BufferedWriter bufferedWriter;
     private long start;
 
     //-----------------------------------
-    public Client(Socket socket, String username) {
+    public Client(Socket socket, String userID) {
         try {
             this.socket = socket;
-            this.username = username;
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            this.userID = userID;
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -27,7 +28,7 @@ public class Client {
     //----------------------------------
     public void sendMessage() {
         try {
-            bufferedWriter.write(username);
+            bufferedWriter.write(userID);
             bufferedWriter.newLine();
             bufferedWriter.flush();
             start = System.currentTimeMillis();
@@ -45,14 +46,12 @@ public class Client {
                 }
                 if (messageToSend.equals("ping")) {
                     start = System.currentTimeMillis();
-                    bufferedWriter.write("");//----------------------
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
+                    bufferedWriter.write("");
                 } else {
-                    bufferedWriter.write(username + " : " + messageToSend);
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
+                    bufferedWriter.write( messageToSend);
                 }
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
             }
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
@@ -61,23 +60,20 @@ public class Client {
 
     //---------------------------------------
     public void listenForMassage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msgFromGroupChat="";
-                while (socket.isConnected()) {
-                    try {
-                        msgFromGroupChat = bufferedReader.readLine();
-                        if (msgFromGroupChat.equals("connected")){
-                            long end=System.currentTimeMillis();
-                            System.out.println("ping : "+ (end-start));
-                        }else {
-                            System.out.println(msgFromGroupChat);
-                        }
-
-                    } catch (IOException|NullPointerException e) {
-                        closeEverything(socket, bufferedReader, bufferedWriter);
+        new Thread(() -> {
+            String msgFromGroupChat;
+            while (socket.isConnected()) {
+                try {
+                    msgFromGroupChat = bufferedReader.readLine();
+                    if (msgFromGroupChat.equals("connected")){
+                        long end=System.currentTimeMillis();
+                        System.out.println("ping : "+ (end-start));
+                    }else {
+                        System.out.println(msgFromGroupChat);
                     }
+
+                } catch (IOException|NullPointerException e) {
+                    closeEverything(socket, bufferedReader, bufferedWriter);
                 }
             }
         }).start();
@@ -102,15 +98,6 @@ public class Client {
     }
 
     //-----------------------------------------
-    public static void main(String[] args) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("enter your username to join");
-        String username = scanner.nextLine();
-        Socket socket = new Socket("localhost", 1234);
-        Client client = new Client(socket, username);
-        client.listenForMassage();
-        client.sendMessage();
 
-    }
 
 }

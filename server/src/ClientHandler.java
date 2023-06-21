@@ -13,18 +13,27 @@ public class ClientHandler implements Runnable {
 
     public ClientHandler(Socket socket) throws IOException {
         try {
-            Users.getInstance().saveUsers();
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.clientUsername = bufferedReader.readLine();
-            this.clientID=clientHandlers.size()+String.valueOf(Integer.valueOf(this.clientUsername.charAt(1)));
-            if(Users.getInstance().showUsers().contains(clientID)){
-            clientHandlers.add(this);}
-            else {
-                sendTryAgain(clientUsername);
+
+            this.clientID= bufferedReader.readLine();
+
+            if(Users.getInstance().showUsersID().contains(this.clientID)){
+                this.clientUsername=Users.getInstance().getUsername(this.clientID);
+                clientHandlers.add(this);
+                Massages massages = new Massages();
+
+                for (String massage0 :massages.showMassage()){
+                    this.bufferedWriter.write(massage0);
+                    this.bufferedWriter.newLine();
+                    this.bufferedWriter.flush();
+                }
+                broadcastMassage("SERVER: " + clientUsername + " has connected the chat ");
+            }else {
+                sendError();
             }
-            broadcastMassage("SERVER: " + clientUsername + " has connected the chat ");
+
         } catch (IOException e) {
             closeEveryThing(socket, bufferedWriter, bufferedReader);
         }
@@ -41,6 +50,7 @@ public class ClientHandler implements Runnable {
                 }else {
                     if (!massageFromClient.equals("")) {
                         Massages massages = new Massages();
+                        massageFromClient=this.clientUsername + " : " +massageFromClient;
                         massages.saveMassage(this.clientID,this.clientUsername,massageFromClient, LocalDateTime.now());
                     }
                     broadcastMassage(massageFromClient);
@@ -60,15 +70,6 @@ public class ClientHandler implements Runnable {
                         clientHandler.bufferedWriter.write(massageToSend);
                         clientHandler.bufferedWriter.newLine();
                         clientHandler.bufferedWriter.flush();
-                    }
-                    else {
-                        Massages massages = new Massages();
-
-                        for (String massage0 :massages.showMassage()){
-                            clientHandler.bufferedWriter.write(massage0);
-                            clientHandler.bufferedWriter.newLine();
-                            clientHandler.bufferedWriter.flush();
-                        }
                     }
                 }
             } catch (IOException e) {
@@ -108,14 +109,10 @@ public class ClientHandler implements Runnable {
         }
     }
     //--------------------------------------------
-    public void sendTryAgain(String username) throws IOException {
-        for (ClientHandler clientHandler : clientHandlers) {
-            if (clientHandler.clientUsername.equals(username)) {
-                clientHandler.bufferedWriter.write(" try again ");
-                clientHandler.bufferedWriter.newLine();
-                clientHandler.bufferedWriter.flush();
-            }
-        }
+    public void sendError() throws IOException {
+        this.bufferedWriter.write(" error");
+        this.bufferedWriter.newLine();
+        this.bufferedWriter.flush();
     }
     //--------------------------------------------------
 }

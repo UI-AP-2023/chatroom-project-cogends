@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Massages {
     public void saveMassage(String userID, String username, String massage, LocalDateTime time){
@@ -21,7 +22,7 @@ public class Massages {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/chatroom-db","server","1234");
-            String SQLCom  ="SELECT `username`, `massage` FROM `massages`";
+            String SQLCom  ="SELECT `username`, `massage` FROM `massages` ORDER BY `massages`.`time` ASC";
             Statement s = connection.prepareStatement(SQLCom);
             ResultSet resultSet =  s.executeQuery(SQLCom);
             ArrayList<String> massages = new ArrayList<>();
