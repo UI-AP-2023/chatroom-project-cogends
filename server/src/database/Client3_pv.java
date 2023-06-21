@@ -1,15 +1,16 @@
+package database;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class Massages {
+public class Client3_pv {
     public void saveMassage(String userID, String username, String massage, LocalDateTime time){
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/chatroom-db","server","1234");
-            String SQLCom  =String.format("INSERT INTO `massages`(`userID`, `username`, `massage`, `time`) VALUES ('%s','%s','%s','%s')",userID,username,massage,time);
+            String SQLCom  =String.format("INSERT INTO `client3-pv`(`userID`, `username`, `massage`, `time`) VALUES ('%s','%s','%s','%s')",userID,username,massage,time);
             Statement s = connection.prepareStatement(SQLCom);
             s.execute(SQLCom);
             connection.close();
@@ -22,7 +23,7 @@ public class Massages {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/chatroom-db","server","1234");
-            String SQLCom  ="SELECT `username`, `massage` FROM `massages` ORDER BY `massages`.`time` ASC";
+            String SQLCom  ="SELECT `username`, `massage` FROM `client3-pv`";
             Statement s = connection.prepareStatement(SQLCom);
             ResultSet resultSet =  s.executeQuery(SQLCom);
             ArrayList<String> massages = new ArrayList<>();
